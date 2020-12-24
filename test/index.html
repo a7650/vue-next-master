@@ -10,8 +10,24 @@
 </body>
 <script src="../packages//vue/dist/vue.global.js"></script>
 <script>
+
   Vue.createApp({
-    template:'<div>test</div>',
+    components:{
+      Home:{
+        template:`<div>{{msg}}</div>`,
+        props:['msg']
+      }
+    },
+    template:
+    `<div>
+      <span>app</span>
+      <Home :msg="msg"/>
+    </div>`,
+    data(){
+      return {
+        msg:'msg'
+      }
+    }
   }).mount('#app')
 </script>
 </html>

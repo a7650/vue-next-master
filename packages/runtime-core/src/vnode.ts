@@ -346,6 +346,9 @@ function _createVNode(
   }
 
   // class & style normalization.
+  /**
+   * 对props的class和style做一些处理
+   */
   if (props) {
     // for reactive or proxy objects, we need to clone it to enable mutation.
     if (isProxy(props) || InternalObjectKey in props) {
@@ -366,6 +369,7 @@ function _createVNode(
   }
 
   // encode the vnode type information into a bitmap
+  debugger
   const shapeFlag = isString(type)
     ? ShapeFlags.ELEMENT
     : __FEATURE_SUSPENSE__ && isSuspense(type)

@@ -64,6 +64,7 @@ export function renderComponentRoot(
 
   let result
   currentRenderingInstance = instance
+  debugger
   if (__DEV__) {
     accessedAttrs = false
   }

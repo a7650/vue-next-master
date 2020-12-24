@@ -4,7 +4,7 @@ import {
   pauseTracking,
   resetTracking,
   shallowReadonly,
-  proxyRefs,
+  proxyRefs
 } from '@vue/reactivity'
 import {
   ComponentPublicInstance,
@@ -13,13 +13,13 @@ import {
   createRenderContext,
   exposePropsOnRenderContext,
   exposeSetupStateOnRenderContext,
-  ComponentPublicInstanceConstructor,
+  ComponentPublicInstanceConstructor
 } from './componentPublicInstance'
 import {
   ComponentPropsOptions,
   NormalizedPropsOptions,
   initProps,
-  normalizePropsOptions,
+  normalizePropsOptions
 } from './componentProps'
 import { Slots, initSlots, InternalSlots } from './componentSlots'
 import { warn } from './warning'
@@ -30,14 +30,14 @@ import {
   applyOptions,
   ComponentOptions,
   ComputedOptions,
-  MethodOptions,
+  MethodOptions
 } from './componentOptions'
 import {
   EmitsOptions,
   ObjectEmitsOptions,
   EmitFn,
   emit,
-  normalizeEmitsOptions,
+  normalizeEmitsOptions
 } from './componentEmits'
 import {
   EMPTY_OBJ,
@@ -47,13 +47,13 @@ import {
   NO,
   makeMap,
   isPromise,
-  ShapeFlags,
+  ShapeFlags
 } from '@vue/shared'
 import { SuspenseBoundary } from './components/Suspense'
 import { CompilerOptions } from '@vue/compiler-core'
 import {
   currentRenderingInstance,
-  markAttrsAccessed,
+  markAttrsAccessed
 } from './componentRenderUtils'
 import { startMeasure, endMeasure } from './profiling'
 import { devtoolsComponentAdded } from './devtools'
@@ -164,7 +164,7 @@ export const enum LifecycleHooks {
   ACTIVATED = 'a',
   RENDER_TRIGGERED = 'rtg',
   RENDER_TRACKED = 'rtc',
-  ERROR_CAPTURED = 'ec',
+  ERROR_CAPTURED = 'ec'
 }
 
 export interface SetupContext<E = EmitsOptions> {
@@ -412,6 +412,10 @@ export function createComponentInstance(
   const appContext =
     (parent ? parent.appContext : vnode.appContext) || emptyAppContext
 
+  // 组件实例
+  // Vue2中是通过Vue.extend的生成的构造函数创建的实例，组件内部执行的环境就是实例的this
+  // Vue3中直接就是一个对象了
+  // 感觉Vue3的更清晰
   const instance: ComponentInternalInstance = {
     uid: uid++,
     vnode,
@@ -476,7 +480,7 @@ export function createComponentInstance(
     a: null,
     rtg: null,
     rtc: null,
-    ec: null,
+    ec: null
   }
   if (__DEV__) {
     instance.ctx = createRenderContext(instance)
@@ -569,10 +573,16 @@ function setupStatefulComponent(
   // 2. call setup()
   const { setup } = Component
   if (setup) {
+    // setup函数只在第二个参数存在时才会生成context
     const setupContext = (instance.setupContext =
       setup.length > 1 ? createSetupContext(instance) : null)
-
+    // 将currentInstance指向当前组件实例
+    // 方便递归时使用
+    // 很好的利用了js单线程的特性
+    // 同一时间只有一个组件在初始化
+    // 某些函数如生命周期函数，就是通过这个变量去判断是否运行在setup中
     currentInstance = instance
+    // 暂停依赖收集
     pauseTracking()
     const setupResult = callWithErrorHandling(
       setup,
@@ -592,6 +602,7 @@ function setupStatefulComponent(
       } else if (__FEATURE_SUSPENSE__) {
         // async setup returned Promise.
         // bail here and wait for re-entry.
+        //
         instance.asyncDep = setupResult
       } else if (__DEV__) {
         warn(
@@ -675,13 +686,14 @@ function finishComponentSetup(
     }
   } else if (!instance.render) {
     // could be set from setup()
+    // 如果不存在渲染函数，就尝试通过编译器去创建渲染函数
     if (compile && Component.template && !Component.render) {
       if (__DEV__) {
         startMeasure(instance, `compile`)
       }
       Component.render = compile(Component.template, {
         isCustomElement: instance.appContext.config.isCustomElement,
-        delimiters: Component.delimiters,
+        delimiters: Component.delimiters
       })
       if (__DEV__) {
         endMeasure(instance, `compile`)
@@ -702,6 +714,8 @@ function finishComponentSetup(
   }
 
   // support for 2.x options
+  // 因为要兼容vue2的语法
+  // 这里主要是处理一些optionsAPI的东西
   if (__FEATURE_OPTIONS_API__) {
     currentInstance = instance
     pauseTracking()
@@ -720,10 +734,10 @@ function finishComponentSetup(
           (__ESM_BUNDLER__
             ? ` Configure your bundler to alias "vue" to "vue/dist/vue.esm-bundler.js".`
             : __ESM_BROWSER__
-            ? ` Use "vue.esm-browser.js" instead.`
-            : __GLOBAL__
-            ? ` Use "vue.global.js" instead.`
-            : ``) /* should not happen */
+              ? ` Use "vue.esm-browser.js" instead.`
+              : __GLOBAL__
+                ? ` Use "vue.global.js" instead.`
+                : ``) /* should not happen */
       )
     } else {
       warn(`Component is missing template or render function.`)
@@ -745,13 +759,13 @@ const attrHandlers: ProxyHandler<Data> = {
   deleteProperty: () => {
     warn(`setupContext.attrs is readonly.`)
     return false
-  },
+  }
 }
 
 export function createSetupContext(
   instance: ComponentInternalInstance
 ): SetupContext {
-  const expose: SetupContext['expose'] = (exposed) => {
+  const expose: SetupContext['expose'] = exposed => {
     if (__DEV__ && instance.exposed) {
       warn(`expose() should be called only once per setup().`)
     }
@@ -774,14 +788,14 @@ export function createSetupContext(
       get emit() {
         return (event: string, ...args: any[]) => instance.emit(event, ...args)
       },
-      expose,
+      expose
     })
   } else {
     return {
       attrs: instance.attrs,
       slots: instance.slots,
       emit: instance.emit,
-      expose,
+      expose
     }
   }
 }
@@ -799,7 +813,7 @@ export function recordInstanceBoundEffect(
 
 const classifyRE = /(?:^|[-_])(\w)/g
 const classify = (str: string): string =>
-  str.replace(classifyRE, (c) => c.toUpperCase()).replace(/[-_]/g, '')
+  str.replace(classifyRE, c => c.toUpperCase()).replace(/[-_]/g, '')
 
 export function getComponentName(
   Component: ConcreteComponent

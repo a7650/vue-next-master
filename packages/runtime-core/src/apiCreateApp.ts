@@ -130,8 +130,8 @@ export function createAppAPI<HostElement>(
       rootProps = null
     }
 
-    const context = createAppContext()
-    const installedPlugins = new Set()
+    const context = createAppContext() // 返回空的配置信息
+    const installedPlugins = new Set() // 已注册的插件
 
     let isMounted = false
 
@@ -155,8 +155,19 @@ export function createAppAPI<HostElement>(
           )
         }
       },
+      /**
+       * 下面的方法都是app对外的一些方法
+       * 注册插件，全局mixin，全局组件之类的
+       * Vue2中是通过global-api，在Vue构造函数上添加方法
+       * Vue3通过创建一个app对象，将方法添加在app对象上
+       * 感觉Vue3这样更合理点，也更清晰
+       */
 
+      /**
+       * 注册插件
+       */
       use(plugin: Plugin, ...options: any[]) {
+        // 基本上就是判断下该插件有没有被注册，然后调用插件的install方法
         if (installedPlugins.has(plugin)) {
           __DEV__ && warn(`Plugin has already been applied to target app.`)
         } else if (plugin && isFunction(plugin.install)) {
@@ -224,8 +235,13 @@ export function createAppAPI<HostElement>(
         return app
       },
 
+      /**
+       * 初始化时执行挂载的方法
+       * 这个函数关键的逻辑就是创建vnode，然后渲染vnode
+       */
       mount(rootContainer: HostElement, isHydrate?: boolean): any {
         if (!isMounted) {
+          // 创建vnode
           const vnode = createVNode(
             rootComponent as ConcreteComponent,
             rootProps

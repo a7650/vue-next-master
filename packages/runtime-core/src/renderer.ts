@@ -446,9 +446,9 @@ function baseCreateRenderer(
   // Note: functions inside this closure should use `const xxx = () => {}`
   // style in order to prevent being inlined by minifiers.
   const patch: PatchFn = (
-    n1,
-    n2,
-    container,
+    n1, // 旧的vnode
+    n2, // 新的vnode
+    container, // 要挂载的节点
     anchor = null,
     parentComponent = null,
     parentSuspense = null,
@@ -456,12 +456,16 @@ function baseCreateRenderer(
     optimized = false
   ) => {
     // patching & not same type, unmount old tree
+    // 如果旧的vnode和新的vnode不是同一类型的话，直接卸载旧的vnode
     if (n1 && !isSameVNodeType(n1, n2)) {
       anchor = getNextHostNode(n1)
       unmount(n1, parentComponent, parentSuspense, true)
       n1 = null
     }
 
+    // 如果某些节点是用户手写渲染函数生成的，而不是编译器生成的话，关闭优化
+    // 这个主要是防止引入一些不确定的因素
+    // 因为手写的渲染函数并没有编译时的优化
     if (n2.patchFlag === PatchFlags.BAIL) {
       optimized = false
       n2.dynamicChildren = null
@@ -1196,6 +1200,7 @@ function baseCreateRenderer(
     optimized: boolean
   ) => {
     if (n1 == null) {
+      // keep-alive处理
       if (n2.shapeFlag & ShapeFlags.COMPONENT_KEPT_ALIVE) {
         ;(parentComponent!.ctx as KeepAliveContext).activate(
           n2,
@@ -1205,6 +1210,7 @@ function baseCreateRenderer(
           optimized
         )
       } else {
+        // 这个方法是关键的挂载组件的方法
         mountComponent(
           n2,
           container,
@@ -1216,6 +1222,8 @@ function baseCreateRenderer(
         )
       }
     } else {
+      // 存在旧节点时说明组件不是首次挂载
+      // 所以执行update
       updateComponent(n1, n2, optimized)
     }
   }
@@ -1229,6 +1237,7 @@ function baseCreateRenderer(
     isSVG,
     optimized
   ) => {
+    // 创建组件实例
     const instance: ComponentInternalInstance = (initialVNode.component = createComponentInstance(
       initialVNode,
       parentComponent,
@@ -1253,6 +1262,8 @@ function baseCreateRenderer(
     if (__DEV__) {
       startMeasure(instance, `init`)
     }
+    // 关键的设置组件的方法
+    // 主要是执行setup函数，render函数，optionsAPI等
     setupComponent(instance)
     if (__DEV__) {
       endMeasure(instance, `init`)
@@ -1272,6 +1283,7 @@ function baseCreateRenderer(
       return
     }
 
+    // 关键的设置组件渲染的方法
     setupRenderEffect(
       instance,
       initialVNode,
@@ -1352,6 +1364,7 @@ function baseCreateRenderer(
         if (__DEV__) {
           startMeasure(instance, `render`)
         }
+        // 生成子节点的vnode
         const subTree = (instance.subTree = renderComponentRoot(instance))
         if (__DEV__) {
           endMeasure(instance, `render`)
