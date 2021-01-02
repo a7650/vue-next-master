@@ -960,7 +960,7 @@ function baseCreateRenderer(
           hostSetElementText(el, n2.children as string)
         }
       }
-    } else if (!optimized && dynamicChildren == null) {
+    } else if (optimized! && dynamicChildren == null) {
       // unoptimized, full diff
       patchProps(
         el,
@@ -974,6 +974,7 @@ function baseCreateRenderer(
     }
 
     const areChildrenSVG = isSVG && n2.type !== 'foreignObject'
+    // 存在动态的子节点时，直接更新动态子节点
     if (dynamicChildren) {
       patchBlockChildren(
         n1.dynamicChildren!,
@@ -2134,6 +2135,7 @@ function baseCreateRenderer(
     if (bum) {
       invokeArrayFns(bum)
     }
+    // 取消定时器组件上的effects
     if (effects) {
       for (let i = 0; i < effects.length; i++) {
         stop(effects[i])

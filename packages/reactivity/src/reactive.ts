@@ -1,4 +1,4 @@
-import { isObject, toRawType, def } from '@vue/shared'
+import { def, isObject, toRawType } from '@vue/shared'
 import {
   mutableHandlers,
   readonlyHandlers,
@@ -10,7 +10,7 @@ import {
   readonlyCollectionHandlers,
   shallowCollectionHandlers
 } from './collectionHandlers'
-import { UnwrapRef, Ref } from './ref'
+import { Ref, UnwrapRef } from './ref'
 
 export const enum ReactiveFlags {
   SKIP = '__v_skip',

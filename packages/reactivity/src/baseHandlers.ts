@@ -5,7 +5,7 @@ import {
   ReactiveFlags,
   Target,
   readonlyMap,
-  reactiveMap,
+  reactiveMap
 } from './reactive'
 import { TrackOpTypes, TriggerOpTypes } from './operations'
 import {
@@ -13,7 +13,7 @@ import {
   trigger,
   ITERATE_KEY,
   pauseTracking,
-  resetTracking,
+  resetTracking
 } from './effect'
 import {
   isObject,
@@ -22,13 +22,13 @@ import {
   hasChanged,
   isArray,
   isIntegerKey,
-  extend,
+  extend
 } from '@vue/shared'
-import { isRef } from './ref'
+import { isRef, Ref, ref } from './ref'
 
 const builtInSymbols = new Set(
   Object.getOwnPropertyNames(Symbol)
-    .map((key) => (Symbol as any)[key])
+    .map(key => (Symbol as any)[key])
     .filter(isSymbol)
 )
 
@@ -40,9 +40,9 @@ const shallowReadonlyGet = /*#__PURE__*/ createGetter(true, true)
 const arrayInstrumentations: Record<string, Function> = {}
 // instrument identity-sensitive Array methods to account for possible reactive
 // values
-;(['includes', 'indexOf', 'lastIndexOf'] as const).forEach((key) => {
+;(['includes', 'indexOf', 'lastIndexOf'] as const).forEach(key => {
   const method = Array.prototype[key] as any
-  arrayInstrumentations[key] = function (this: unknown[], ...args: unknown[]) {
+  arrayInstrumentations[key] = function(this: unknown[], ...args: unknown[]) {
     const arr = toRaw(this)
     for (let i = 0, l = this.length; i < l; i++) {
       track(arr, TrackOpTypes.GET, i + '')
@@ -59,9 +59,9 @@ const arrayInstrumentations: Record<string, Function> = {}
 })
 // instrument length-altering mutation methods to avoid length being tracked
 // which leads to infinite loops in some cases (#2137)
-;(['push', 'pop', 'shift', 'unshift', 'splice'] as const).forEach((key) => {
+;(['push', 'pop', 'shift', 'unshift', 'splice'] as const).forEach(key => {
   const method = Array.prototype[key] as any
-  arrayInstrumentations[key] = function (this: unknown[], ...args: unknown[]) {
+  arrayInstrumentations[key] = function(this: unknown[], ...args: unknown[]) {
     pauseTracking()
     const res = method.apply(this, args)
     resetTracking()
@@ -189,7 +189,7 @@ export const mutableHandlers: ProxyHandler<object> = {
   set,
   deleteProperty,
   has,
-  ownKeys,
+  ownKeys
 }
 
 export const readonlyHandlers: ProxyHandler<object> = {
@@ -211,7 +211,7 @@ export const readonlyHandlers: ProxyHandler<object> = {
       )
     }
     return true
-  },
+  }
 }
 
 export const shallowReactiveHandlers: ProxyHandler<object> = extend(
@@ -219,7 +219,7 @@ export const shallowReactiveHandlers: ProxyHandler<object> = extend(
   mutableHandlers,
   {
     get: shallowGet,
-    set: shallowSet,
+    set: shallowSet
   }
 )
 
@@ -230,6 +230,6 @@ export const shallowReadonlyHandlers: ProxyHandler<object> = extend(
   {},
   readonlyHandlers,
   {
-    get: shallowReadonlyGet,
+    get: shallowReadonlyGet
   }
 )

@@ -12,22 +12,21 @@
 <script>
 
   Vue.createApp({
-    components:{
-      Home:{
-        template:`<div>{{msg}}</div>`,
-        props:['msg']
-      }
-    },
     template:
-    `<div>
-      <span>app</span>
-      <Home :msg="msg"/>
-    </div>`,
+      `<div @click="change">
+          <div v-for="item in list" :key="item">1</div>
+      </div>`,
     data(){
       return {
-        msg:'msg'
+        msg:'1',
+        list:[1,2,3,4,5]
       }
-    }
+    },
+    methods: {
+      change(){
+        this.list = [2]
+      }
+    },
   }).mount('#app')
 </script>
 </html>
