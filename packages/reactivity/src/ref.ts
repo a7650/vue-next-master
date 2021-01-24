@@ -20,8 +20,6 @@ export interface Ref<T = any> {
   _shallow?: boolean
 }
 
-
-
 export type ToRef<T> = T extends Ref ? T : Ref<UnwrapRef<T>>
 export type ToRefs<T = any> = {
   // #2687: somehow using ToRef<T[K]> here turns the resulting type into

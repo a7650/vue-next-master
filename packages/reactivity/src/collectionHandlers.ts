@@ -36,6 +36,7 @@ function get(
 ) {
   // #1772: readonly(reactive(Map)) should return readonly + reactive version
   // of the value
+  debugger
   target = (target as any)[ReactiveFlags.RAW]
   const rawTarget = toRaw(target)
   const rawKey = toRaw(key)
@@ -317,7 +318,7 @@ function createInstrumentationGetter(isReadonly: boolean, shallow: boolean) {
     } else if (key === ReactiveFlags.RAW) {
       return target
     }
-
+    const a = { a: 1 }
     return Reflect.get(
       hasOwn(instrumentations, key) && key in target
         ? instrumentations

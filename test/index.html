@@ -10,22 +10,23 @@
 </body>
 <script src="../packages//vue/dist/vue.global.js"></script>
 <script>
-
+const {reactive,readonly} = Vue
   Vue.createApp({
     template:
-      `<div @click="change">
-          <div v-for="item in list" :key="item">1</div>
+      `<div>
       </div>`,
-    data(){
-      return {
-        msg:'1',
-        list:[1,2,3,4,5]
-      }
-    },
+      setup(props) {
+        return {
+          user: reactive({a:1})
+        }
+      },
     methods: {
       change(){
         this.list = [2]
       }
+    },
+    mounted() {
+    console.log(this.user.__v_raw)
     },
   }).mount('#app')
 </script>

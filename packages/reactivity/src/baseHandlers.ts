@@ -79,6 +79,7 @@ function createGetter(isReadonly = false, shallow = false) {
       key === ReactiveFlags.RAW &&
       receiver === (isReadonly ? readonlyMap : reactiveMap).get(target)
     ) {
+      debugger
       return target
     }
 
