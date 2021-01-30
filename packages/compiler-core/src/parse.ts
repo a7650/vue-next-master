@@ -460,6 +460,7 @@ function parseTag(
   }
 
   // check v-pre
+  debugger
   if (
     !context.inVPre &&
     props.some(p => p.type === NodeTypes.DIRECTIVE && p.name === 'pre')
